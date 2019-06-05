@@ -1,4 +1,4 @@
-# Gabow Tarjan Implementation
+# Combinatorial Optimal Transport Implementation
 
 This repository contains the MATLAB code for the Gabow-Tarjan optimal transport algorithm described in:
 https://arxiv.org/abs/1905.11830
