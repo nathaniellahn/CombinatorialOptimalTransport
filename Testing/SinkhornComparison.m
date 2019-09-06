@@ -30,11 +30,6 @@ C = C.*C;
 %normalize cost matrix to set natural scale
 C = C / median(C(:)); 
 
-%initialize parameters
-disp(max(max(C)))
-
-%deltas = [0.025,0.05,0.075,0.1,0.125,0.15,0.175,0.2];
-%deltas = [0.2,0.4,0.6,0.8,1.0]
 deltas = [0.05, 0.1, 0.15,0.2, 0.25];
 
 runs = 10; %number of runs of the experiment
