@@ -31,8 +31,11 @@ C = C.*C;
 C = C / median(C(:)); 
 
 %initialize parameters
+disp(max(max(C)))
 
-deltas = [0.025,0.05,0.075,0.1,0.125,0.15,0.175,0.2];
+%deltas = [0.025,0.05,0.075,0.1,0.125,0.15,0.175,0.2];
+%deltas = [0.2,0.4,0.6,0.8,1.0]
+deltas = [0.05, 0.1, 0.15,0.2, 0.25];
 
 runs = 10; %number of runs of the experiment
 
@@ -64,9 +67,17 @@ for k = 1:1:runs
     b = b/sum(b);    
     
     %% Verify solutions using LINPROG
+    
     disp('LINPROG SOLUTION');
     timerValIn3 = tic;
+   
+    lp_sol = -1;
+    lp_val = -1;
+    
+    %If the optimal cost is not needed, comment this out as it takes
+    %a long time to run.
     [lp_sol,lp_val] = computeot_lp( C,a,b',n );
+   
     timerValOut3 = toc(timerValIn3);
     lp_time = timerValOut3;
    
@@ -77,9 +88,12 @@ for k = 1:1:runs
         %%
         %% Run Sinkhorn
         disp('start Sinkhorn');
-        [iter,time,A,~] = Sinkhorn(a,b,delta);
         
-    
+        %[iter,time,A,~] = Sinkhorn(a,b,delta);
+        
+        %Run this code if we want to give sinkhorn a more lenient delta.
+        %Such that the actual errors generated match ours.
+        [iter,time,A,~] = Sinkhorn(a,b,3.5*delta);
        
         %% Calculating their solution
         
@@ -134,6 +148,7 @@ for k = 1:1:runs
         
     end
 end
+
 
 results.Properties.VariableNames = {'run', 'C','LINPROGCost','LINPROGTime','delta','SinkhornTime','SinkhornIter','ErrorSinkhorn', 'GTTime', 'GTIter','GTAPLengths' 'ErrorGT','ImageOneIndex', 'ImageTwoIndex'};
 

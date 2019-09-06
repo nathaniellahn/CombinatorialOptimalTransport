@@ -1,5 +1,5 @@
 % This function implements the Greedy match routine to match the leftover
-% supplies and demands from the GTTransport or GTTransportDelta
+% supplies and demands from the GTTransport
 % implementations. 
 
 function greedyCapacity = greedyMatch(n, gsupplies, gdemands, CostGreedy)
@@ -7,7 +7,7 @@ function greedyCapacity = greedyMatch(n, gsupplies, gdemands, CostGreedy)
 % Greedy matching
 greedyCapacity = zeros(n);
 
-% Sort using quick sort in O(nlogn)
+% Sort using quick sort
 [~,I] = sort(CostGreedy, 2);
 
 for i = 1:n

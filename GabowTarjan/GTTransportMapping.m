@@ -7,14 +7,15 @@
 
 
 function [maxC, GTTransport_time, total_cost_transport, iterationCountTransport, APLengths, capacity_fulfilled] = GTTransportMapping(n, supplies, demands, CostInput, delta)
-    
+    GTTransport_time = tic();
+    tt1 = tic();
     % Mapping
     maxC = max(max(CostInput));
     CostNips=floor(4*CostInput/delta);
     newSupplies = floor((4*supplies*n*maxC)/delta);
     newDemands = ceil((4*demands*n*maxC)/delta);
     newDemands = newDemands';
-    
+    %{
     % Generating required cost matrix
     C = randi(n*2,n*2);
     for i = 1 : n
@@ -40,12 +41,15 @@ function [maxC, GTTransport_time, total_cost_transport, iterationCountTransport,
             C(i,j) = C(j,i);
         end
     end
-    
-    
+    %}
+    tt1 = toc(tt1);
+    disp(tt1);
+    tt2 = tic();
     timerValIn4 = tic;
-    [iterationCountTransport, APLengths, capacity] = GTTransport(C, newSupplies, newDemands, n);
-    
-   
+    [iterationCountTransport, APLengths, capacity] = GTTransport(CostNips, newSupplies, newDemands, n);
+    tt2 = toc(tt2);
+    disp(tt2);
+    tt3 = tic();
     actualSupplies = zeros(1,n);
     actualDemands = zeros(1,n);
     
@@ -88,7 +92,7 @@ function [maxC, GTTransport_time, total_cost_transport, iterationCountTransport,
     % Computing greedy match for the remaining supplies and demands
     [greedyCapacity] = greedyMatch(n, remSupplies, remDemands, CostInput);
     timerValOut4 = toc(timerValIn4);
-    GTTransport_time = timerValOut4;
+    %GTTransport_time = timerValOut4;
     
     % Final edge capacities
     for i=1:n
@@ -141,5 +145,7 @@ function [maxC, GTTransport_time, total_cost_transport, iterationCountTransport,
     
     %Check total flow pushed is 1.
     assert(abs(capacity_fulfilled - 1) <= tolerance);
-
+    tt3 = toc(tt3);
+    disp(tt3);
+    GTTransport_time = toc(GTTransport_time);
 end

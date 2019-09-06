@@ -1,4 +1,5 @@
 function [iter,time,A,B]=Sinkhorn(r,c,epsilon)
+
 %An implementation of Sinkhorn's algorithm 
 %from [Altshuler et al, 2017], Alg.3
 %Code was retrieved from https://github.com/chervud/AGD-vs-Sinkhorn
@@ -52,6 +53,7 @@ while (norm(r - sum(A,2),1) + norm(c - sum(A,1)',1) > epsilon/8/max_el)
     C_new = -C/gamma+x*ones(1,n)+ones(n,1)*y';
     A = exp(C_new);
 end
+
 
 %Round off the supplies and demands to satisfy the feasibility constraints
 %Due to the while loop stopping condition, the cost error incurred is

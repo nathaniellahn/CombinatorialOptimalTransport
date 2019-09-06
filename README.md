@@ -2,6 +2,7 @@
 
 This repository contains the MATLAB code for the Gabow-Tarjan optimal transport algorithm described in:
 https://arxiv.org/abs/1905.11830
+The code is a joint effort between the authors of that paper. 
 
 ## Requirements
 1. To use this code, download matlab from https://www.mathworks.com/products/matlab.html
