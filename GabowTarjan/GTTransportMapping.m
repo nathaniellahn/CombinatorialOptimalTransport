@@ -8,7 +8,6 @@
 
 function [maxC, GTTransport_time, total_cost_transport, iterationCountTransport, APLengths, capacity_fulfilled] = GTTransportMapping(n, supplies, demands, CostInput, delta)
     GTTransport_time = tic();
-    tt1 = tic();
     % Mapping
     maxC = max(max(CostInput));
     CostNips=floor(4*CostInput/delta);
@@ -16,7 +15,6 @@ function [maxC, GTTransport_time, total_cost_transport, iterationCountTransport,
     newDemands = ceil((4*demands*n*maxC)/delta);
     newDemands = newDemands';
     
-    timerValIn4 = tic;
     [iterationCountTransport, APLengths, capacity] = GTTransport(CostNips, newSupplies, newDemands, n);
     actualSupplies = zeros(1,n);
     actualDemands = zeros(1,n);
