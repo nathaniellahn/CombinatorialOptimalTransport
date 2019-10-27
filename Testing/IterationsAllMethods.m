@@ -9,7 +9,6 @@
 %For the javaaddpath command, use the directory of the Java .class files.
 clear java;
 clc;
-
 javaaddpath('..\GabowTarjanJavaCode\GTTransport\bin\');
 import optimaltransport.*;
 
@@ -46,7 +45,7 @@ maxC = max(max(C));
 %initialize parameters
 
 deltas = [0.025, 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2];
-runs = 100; %number of runs of the experiment; 100 in paper
+runs = 10; %number of runs of the experiment
 
 for k = 1:1:runs
     disp("Starting run #" + num2str(k));
@@ -87,20 +86,22 @@ for k = 1:1:runs
     lp_time = tic;
     
     %If the optimal cost is not needed, comment this out as it takes
-    %a long time to run. Note, doing so will mean errors are not valid.
+    %a long time to run.
     %[lp_sol,lp_val] = computeot_lp( C,a,b',n );
     lp_time = toc(lp_time);
  
     for delta = deltas
-        %% Runs NIPS '17 version of Sinkhorn. 
-        %Retrieved from https://github.com/JasonAltschuler/OptimalTransportNIPS17
+        %% Calculating their solution
+
+        errSinkhorn = -1;
+        sink2iters = -1;
+        ot_val_sink2 = -1;
+        
+        %% Runs NIPS '17 version of Sinkhorn
         disp('start Sinkhorn');
         timerSink2 = tic;
-        delta_prime = delta; %To roughly match errors, set this to 5*delta
+        delta_prime = delta;
        
-        %Set eta as described in paper based on thoeretical bounds.
-        %While smaller eta can be used in practice, we do not investigate this
-        %here.
         eta = 4*log(n) / delta_prime;
         eps_prime = delta_prime / (8*maxC);
         A=exp(-1 * eta * C);
@@ -108,9 +109,30 @@ for k = 1:1:runs
         [~, ot_val_sink2, sink2iters] = sinkhorn2(A, a, b', eps_prime, C);
         sink2iters = sink2iters - 1;
         timerSink2 = toc(timerSink2);
-        
-        %Note, incorrect if linprog was not run.
         errSink2 = ot_val_sink2 - lp_val;
+        
+        
+        %% Run Greenkhorn
+        ot_val_greenk = -1; 
+        greenk_iters = -1;
+        timerGreenk = -1;
+        errGreenk = -1;
+        
+        disp("Start Greenkhorn")
+        timerGreenk = tic();
+        [~, ot_val_greenk, greenk_iters] = greenkhorn(A, a, b', eps_prime, C);
+        greenk_iters = greenk_iters / n; %One "iter" for greenkhorn is n row column updates.
+        timerGreenk = toc(timerGreenk);
+        errGreenk = ot_val_greenk - lp_val;
+        
+        
+        %% Run ICML '18 APDAGD
+        AGDIters = -1;
+        AGDTime = -1;
+        
+        disp("Start AGD")
+        [AGDIters, AGDTime] = APDAGD(a, b, delta, C);
+        
         
         %% Run GTTransport
         disp('Start GT Algorithm')
@@ -118,7 +140,7 @@ for k = 1:1:runs
         gtSolver = optimaltransport.Mapping(n, a, b', C, delta);
         GTTransport_time = gtSolver.getTimeTaken();
         GTTransportMainRoutineTime = gtSolver.getMainRoutineTimeInSeconds();
-
+       
         flow = gtSolver.getFlow();
         total_cost_transport = gtSolver.getTotalCost();
         iterationCountTransport = gtSolver.getIterations();
@@ -146,18 +168,19 @@ for k = 1:1:runs
         if lp_val > 0
             assert(errGT <= delta);
         end
+     
         %% Saving results
-        newRow = {k, maxC, lp_val, lp_time, delta,timerSink2,errSink2,sink2iters,GTTransport_time, iterationCountTransport, APLengths, errGT, imageIndex1, imageIndex2};
+        newRow = {k, maxC, lp_val, lp_time, delta,timerSink2,errSink2,sink2iters,errGreenk,greenk_iters,timerGreenk,AGDIters, AGDTime,  GTTransport_time, iterationCountTransport, APLengths, errGT, imageIndex1, imageIndex2};
         results=[results;newRow];
         
     end
 end
 
 
-results.Properties.VariableNames = {'run', 'C','LINPROGCost','LINPROGTime','delta','SinkTime', 'SinkError','SinkIters','GTTime', 'GTIter','GTAPLengths' 'ErrorGT', 'ImageOneIndex', 'ImageTwoIndex'};
+results.Properties.VariableNames = {'run', 'C','LINPROGCost','LINPROGTime','delta','SinkTime', 'SinkError','sinkiters','errGreenk','greenk_iters','timerGreenk', 'AGDIters', 'AGDTime', 'GTTime', 'GTIter','GTAPLengths' 'ErrorGT', 'ImageOneIndex', 'ImageTwoIndex'};
 
 %% Generate average results
-avgResults = varfun(@mean,results,'InputVariables',{'SinkTime', 'SinkError','SinkIters', 'GTTime', 'GTIter','GTAPLengths' 'ErrorGT' },'GroupingVariables',{'delta'});
+avgResults = varfun(@mean,results,'InputVariables',{'C','LINPROGCost','LINPROGTime', 'SinkTime', 'SinkError','sinkiters', 'errGreenk','greenk_iters','timerGreenk','AGDIters', 'AGDTime','GTTime', 'GTIter','GTAPLengths' 'ErrorGT'},'GroupingVariables',{'delta'});
 disp(avgResults);
 
 

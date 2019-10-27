@@ -9,8 +9,7 @@
 %For the javaaddpath command, use the directory of the Java .class files.
 clear java;
 clc;
-
-javaaddpath('..\GabowTarjanJavaCode\GTTransport\bin\');
+javaaddpath('.\..\GabowTarjanJavaCode\GTTransport\bin\');
 import optimaltransport.*;
 
 %Add all files of project to path
@@ -45,8 +44,9 @@ maxC = max(max(C));
 
 %initialize parameters
 
-deltas = [0.025, 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2];
-runs = 100; %number of runs of the experiment; 100 in paper
+deltas = [0.1, 0.01, 0.001, 0.0001];
+
+runs = 100; %number of runs of the experiment
 
 for k = 1:1:runs
     disp("Starting run #" + num2str(k));
@@ -79,50 +79,29 @@ for k = 1:1:runs
     b = b/sum(b);  
     
     %% Verify solutions using LINPROG
-    
-    disp('Computing Optimal Solution using LINPROG');
-    lp_sol = -1;
-    lp_val = -1;
-    
-    lp_time = tic;
-    
-    %If the optimal cost is not needed, comment this out as it takes
-    %a long time to run. Note, doing so will mean errors are not valid.
-    %[lp_sol,lp_val] = computeot_lp( C,a,b',n );
-    lp_time = toc(lp_time);
- 
+
     for delta = deltas
-        %% Runs NIPS '17 version of Sinkhorn. 
-        %Retrieved from https://github.com/JasonAltschuler/OptimalTransportNIPS17
-        disp('start Sinkhorn');
-        timerSink2 = tic;
-        delta_prime = delta; %To roughly match errors, set this to 5*delta
-       
-        %Set eta as described in paper based on thoeretical bounds.
-        %While smaller eta can be used in practice, we do not investigate this
-        %here.
-        eta = 4*log(n) / delta_prime;
-        eps_prime = delta_prime / (8*maxC);
-        A=exp(-1 * eta * C);
-        A=A/sum(sum(A));
-        [~, ot_val_sink2, sink2iters] = sinkhorn2(A, a, b', eps_prime, C);
-        sink2iters = sink2iters - 1;
-        timerSink2 = toc(timerSink2);
-        
-        %Note, incorrect if linprog was not run.
-        errSink2 = ot_val_sink2 - lp_val;
-        
         %% Run GTTransport
         disp('Start GT Algorithm')
         
         gtSolver = optimaltransport.Mapping(n, a, b', C, delta);
         GTTransport_time = gtSolver.getTimeTaken();
         GTTransportMainRoutineTime = gtSolver.getMainRoutineTimeInSeconds();
-
+       
         flow = gtSolver.getFlow();
         total_cost_transport = gtSolver.getTotalCost();
         iterationCountTransport = gtSolver.getIterations();
         APLengths = gtSolver.getAPLengths();
+        augmentTime = gtSolver.getTimeTakenAugment();
+        
+        %augmentTime is 0 if the timing code is commented out in the Java 
+        %implementation.
+        %Precise timing could negatively affect performance.
+        %If the time taken from augmentations is important,
+        %then uncomment the timing calls in the Java code.
+        if augmentTime == 0
+            augmentTime = -1;
+        end
 
         %% Check to ensure that the solution is a valid transport plan.
         tolerance = 0.000000001;
@@ -139,25 +118,19 @@ for k = 1:1:runs
         end
  
         %% Calculating Error
-        errGT = total_cost_transport - lp_val;
-  
-        %Verify that solution produced is sufficiently close to optimal
-        %if the linprog code was run.
-        if lp_val > 0
-            assert(errGT <= delta);
-        end
+        
         %% Saving results
-        newRow = {k, maxC, lp_val, lp_time, delta,timerSink2,errSink2,sink2iters,GTTransport_time, iterationCountTransport, APLengths, errGT, imageIndex1, imageIndex2};
+        newRow = {k, maxC, delta, GTTransport_time, GTTransportMainRoutineTime, iterationCountTransport, APLengths, augmentTime, imageIndex1, imageIndex2};
         results=[results;newRow];
         
     end
 end
 
 
-results.Properties.VariableNames = {'run', 'C','LINPROGCost','LINPROGTime','delta','SinkTime', 'SinkError','SinkIters','GTTime', 'GTIter','GTAPLengths' 'ErrorGT', 'ImageOneIndex', 'ImageTwoIndex'};
+results.Properties.VariableNames = {'run', 'C','delta','GTTime', 'GTTransportMainRoutineTime', 'GTIter','GTAPLengths', 'AugmentTime','ImageOneIndex', 'ImageTwoIndex'};
 
 %% Generate average results
-avgResults = varfun(@mean,results,'InputVariables',{'SinkTime', 'SinkError','SinkIters', 'GTTime', 'GTIter','GTAPLengths' 'ErrorGT' },'GroupingVariables',{'delta'});
+avgResults = varfun(@mean,results,'InputVariables',{'GTTime', 'GTTransportMainRoutineTime', 'GTIter','GTAPLengths', 'AugmentTime' },'GroupingVariables',{'delta'});
 disp(avgResults);
 
 

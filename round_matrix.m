@@ -1,7 +1,6 @@
-% Code to round to polytope as final step of Sinkhorn.
-% Taken from https://github.com/chervud/AGD-vs-Sinkhorn
-% Unchanged from their impelementation.
+%Code used by APDAGD. See https://github.com/chervud/AGD-vs-Sinkhorn
 function [X_hat]=round_matrix(X_hat_k,r,c)
+
 one = ones(size(X_hat_k,1),1);
 
 x = r./(X_hat_k*one);

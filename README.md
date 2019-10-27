@@ -1,20 +1,33 @@
 # Combinatorial Optimal Transport Implementation
 
-This repository contains the MATLAB code for the Gabow-Tarjan optimal transport algorithm described in:
+This repository contains the MATLAB code for the optimal transport algorithm described in:
 https://arxiv.org/abs/1905.11830
 The code is a joint effort between the authors of that paper. 
 
-## Requirements
-1. To use this code, download matlab from https://www.mathworks.com/products/matlab.html
-2. Download or clone the git project.
-3. The following test files demonstrate usage.
-	a. VaryingC.m : Execute our algorithm on randomly generated supplies, demands, and costs. Costs are drawn uniformly at random from the interval [0,C], for a range of different C values.
-	b. LinprogCompare.m : A comparison of our algorithm with MATLAB's linear programming solver, https://www.mathworks.com/help/optim/ug/linprog.html.
-	c. SinkhornComparison.m : A comparison of our algorithm with the Sinkhorn implementation from https://github.com/chervud/AGD-vs-Sinkhorn. Their implementation is based on Algorithm 3 of the paper https://papers.nips.cc/paper/6792-near-linear-time-approximation-algorithms-for-optimal-transport-via-sinkhorn-iteration.pdf
-4. Note: Relevant files will need to be added to the MATLAB path. To do this, right click the folders and select "Add to Path".
+Note: Paper has been accepted into NeurIPS 2019.
 
-The folder Sinkhorn, and some testing code was obtained from https://github.com/chervud/AGD-vs-Sinkhorn.
-The file computeot_lp.m was obtained from https://github.com/JasonAltschuler/OptimalTransportNIPS17/
+## Requirements
+1. To use this code, obtain MATLAB from https://www.mathworks.com/products/matlab.html
+2. Download or clone the git project.
+3. The following test files can be used to reproduce results from the paper:
+	a.)SmallDelta.m : Test our algorithm on small delta values.
+	b.)SinkhornComparison.m : Compare performance to the Sinkhorn algorithm. 
+	c.)IterationsAllMethods.m : Compare iteration count to Sinkhorn, Greenkhorn, and APDAGD
+See the paper for further details.
+
+The tests are written in MATLAB and call a compiled Java implementation of our algorithm. The Java binary files 
+for Mapping.java and GTTransport.java will need to be created and placed in the 
+GabowTarjanJavaCode\GTTransport\bin\optimaltransport folder. (Alternatively, edit the javaaddpath command in the
+MATLAB code to point to their location). We used Java 8, but most likely other Java versions will do just fine.
+
+The APDAGD implementation and some testing code was obtained from https://github.com/chervud/AGD-vs-Sinkhorn.
+The Sinkhorn and Greenkhorn implementations, the file computeot_lp.m and a few other helper functions were 
+obtained from https://github.com/JasonAltschuler/OptimalTransportNIPS17/
 These files are used to compare our implementation against existing algorithms.
 All credit for those files goes to the respective authors. 
 
+
+Note: The first iteration of this implementation was written in MATLAB and has been preserved in this repository. 
+However, it is signiciantly slower than the Java implementation and has not been 'cleaned up' as much.
+It is highly recommended to use the Java version, especially since the Java code can be called from MATLAB.
+While MATLAB is great for Sinkhorn, etc, Java is a better choice for our algorithm.
