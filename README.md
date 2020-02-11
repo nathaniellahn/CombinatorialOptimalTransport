@@ -15,10 +15,18 @@ Note: Paper has been accepted into NeurIPS 2019.
 	c.)IterationsAllMethods.m : Compare iteration count to Sinkhorn, Greenkhorn, and APDAGD
 See the paper for further details.
 
+
 The tests are written in MATLAB and call a compiled Java implementation of our algorithm. The Java binary files 
 for Mapping.java and GTTransport.java will need to be created and placed in the 
-GabowTarjanJavaCode\GTTransport\bin\optimaltransport folder. (Alternatively, edit the javaaddpath command in the
-MATLAB code to point to their location). We used Java 8, but most likely other Java versions will do just fine.
+GabowTarjanJavaCode\GTTransport\bin\optimaltransport folder. Here, the optimaltransport directory corresponds to a
+Java package that includes both files. We used Java 8, but most likely other Java versions will do just fine.
+
+VERY IMPORTANT: When running the MATLAB test files, make sure to run them from within the Testing folder. 
+The testing files use relative paths, and executing with a different path location for your script will affect your results 
+(most likely, the Java classes won't be found). If you are not comfortable with this, try replacing the command:
+	javaaddpath('..\GabowTarjanJavaCode\GTTransport\bin\');
+with an absolute path on your system. You can use the "javaclasspath" command to ensure that the path to the Java class files 
+is correctly entered.
 
 The APDAGD implementation and some testing code was obtained from https://github.com/chervud/AGD-vs-Sinkhorn.
 The Sinkhorn and Greenkhorn implementations, the file computeot_lp.m and a few other helper functions were 

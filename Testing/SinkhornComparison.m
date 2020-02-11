@@ -1,3 +1,5 @@
+
+
 % Note: This test file has been partially created using the testing code 
 % from 
 % https://github.com/chervud/AGD-vs-Sinkhorn
@@ -10,11 +12,11 @@
 clear java;
 clc;
 
+%Add all files of project to path
+addpath(genpath('../'));
+
 javaaddpath('..\GabowTarjanJavaCode\GTTransport\bin\');
 import optimaltransport.*;
-
-%Add all files of project to path
-addpath(genpath('../../'));
 
 load('mnist.mat', 'testX')
 

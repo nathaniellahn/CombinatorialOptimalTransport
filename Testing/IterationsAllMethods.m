@@ -9,11 +9,12 @@
 %For the javaaddpath command, use the directory of the Java .class files.
 clear java;
 clc;
-javaaddpath('..\GabowTarjanJavaCode\GTTransport\bin\');
-import optimaltransport.*;
 
 %Add all files of project to path
-addpath(genpath('../../'));
+addpath(genpath('../'));
+
+javaaddpath('..\GabowTarjanJavaCode\GTTransport\bin\');
+import optimaltransport.*;
 
 load('mnist.mat', 'testX')
 
